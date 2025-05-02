@@ -1,0 +1,9 @@
+# Requirements for model conversion scripts
+torch>=1.10.0
+torchvision>=0.11.0 
+numpy>=1.19.0
+# ONNX and TensorRT are optional and only needed for actual model conversion
+# These are commented out since they can be difficult to install
+# onnx>=1.10.0  
+# tensorrt>=8.0.0  # Available via NVIDIA repositories
+# pycuda>=2021.1 

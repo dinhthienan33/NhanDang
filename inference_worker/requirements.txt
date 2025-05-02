@@ -1,0 +1,4 @@
+confluent-kafka
+requests
+numpy
+opencv-python-headless 

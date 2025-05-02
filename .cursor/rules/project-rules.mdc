@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+**Translating and formatting request**
+
+The user asks me to translate the Vietnamese text into English and convert it to markdown, ensuring each item is organized into complete thoughts. I'll ensure everything flows clearly in full sentences, with all ideas properly conveyed. Then, I'll format it into markdown following the user's request, organizing the content in a way that's easy to read and structurally sound. My goal is to stay true to the meaning, translating accurately, and making it visually clear using markdown.
+
+**Translating and converting to markdown**
+
+The user wants me to translate and convert the paragraph into English with full clarity. Here's how I'll approach it:
+
+1. I want to develop an automatic rain streak removal system.
+2. I already have a Jupyter Notebook (.ipynb) for both training and inference.
+3. I would like you to build a user interface using React.js.
+4. Develop the backend and pipeline as follows: the web app should receive images, use TensorRT and Triton for smooth inference, and then return the processed images to the user.
+5. Since my model is quite large, please find an efficient way to store it.
+6. Use Redis and Kafka to optimize system performance.
+7. I want the system to be fast, professional, and accurate.
+
+
+Thought for 8 seconds
+
+
+Below is your request translated into English and formatted in Markdown, with each item fully elaborated for clarity:
+
+---
+
+## Automatic Rain Streak Removal System Requirements
+
+1. **Training and Inference Notebook**
+   I already have a comprehensive Jupyter Notebook (`.ipynb`) that implements both the training pipeline and the inference procedures for the model.
+
+2. **Front‑End Development (React.js)**
+   Build a clean, responsive user interface using React.js that allows users to upload images of rainy scenes and immediately view the de‑rained outputs.
+
+3. **Back‑End and Inference Pipeline**
+   Develop a back‑end service and processing pipeline in which the web server accepts incoming images, performs high‑performance inference using TensorRT integrated with Triton Inference Server, and then returns the processed images back to the user.
+
+4. **Model Storage Strategy**
+   Since the model is quite large, propose and implement an efficient storage solution—such as optimized serialization, versioned storage, or cloud‑based model hosting—to manage and serve the model without sacrificing scalability.
+
+5. **System Optimization with Redis and Kafka**
+   Integrate Redis for caching intermediate results and Kafka for asynchronous, fault‑tolerant message queuing. This will improve throughput, reduce latency, and enhance overall system reliability.
+
+6. **Deployment Plan**
+   Design and execute a deployment pipeline that ensures the system operates quickly, professionally, and accurately. You only need to handle the deployment architecture—I'll provide the existing training and inference code files.
+
+
