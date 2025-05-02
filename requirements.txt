@@ -1,0 +1,13 @@
+## inference_worker
+confluent-kafka
+requests
+numpy
+opencv-python-headless 
+## backend
+fastapi
+uvicorn[standard]
+torch
+opencv-python-headless
+numpy
+python-multipart
+pillow 

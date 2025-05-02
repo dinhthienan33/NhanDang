@@ -4,29 +4,29 @@ This project implements a web application for removing rain streaks from images 
 
 ## Project Structure
 
-- `frontend/`: React.js user interface for image upload and display.
-- `backend/`: FastAPI application handling requests, interacting with Kafka/Redis.
-- `inference_worker/`: Kafka consumer that triggers inference via Triton.
-- `model_repository/`: Stores the optimized model for Triton.
+- `frontend/`: HTML/CSS/JavaScript user interface for image upload and display.
+- `backend/`: FastAPI application handling requests, interacting with Redis.
+- `inference_worker/`: Kafka consumer that triggers inference (for production deployment).
+- `model_repository/`: Stores the optimized model for Triton (for production deployment).
 - `scripts/`: Utility scripts (e.g., model conversion).
 - `docker-compose.yml`: Docker Compose configuration for local deployment.
 
-## Requirements Met (from @project-rules.mdc)
+## Requirements Met
 
-1.  **Training/Inference Notebook:** Uses the model from the provided Raindrop-Removal repository.
+1.  **Training/Inference Model:** Uses the model from the provided Raindrop-Removal repository.
 2.  **Front-End:** Simple and responsive UI built with HTML, CSS, and JavaScript.
-3.  **Back-End/Pipeline:** FastAPI backend, Kafka for message processing, and Triton for inference.
-4.  **Model Storage:** Uses Triton's model repository format with TensorRT optimization.
-5.  **Optimization:** Kafka for asynchronous processing and Redis for caching.
-6.  **Deployment:** Complete Docker Compose setup for easy deployment.
+3.  **Back-End/Pipeline:** FastAPI backend with optional Kafka/Triton integration.
+4.  **Model Storage:** For production, uses Triton's model repository format with TensorRT optimization.
+5.  **Optimization:** Redis for caching, with optional Kafka for async processing in production.
+6.  **Deployment:** Docker Compose setup for easy deployment.
 
-## Setup & Run (Local using Docker Compose)
+## Quick Start (Testing/Development)
+
+This setup uses a mock model implementation for testing so you don't need the actual model or GPU.
 
 ### Prerequisites
 
 - Docker and Docker Compose
-- NVIDIA Container Toolkit (for Triton GPU support)
-- GPU with CUDA support (recommended)
 
 ### Step 1: Clone the Repository
 
@@ -35,9 +35,40 @@ git clone <repository-url>
 cd rain-streak-removal
 ```
 
-### Step 2: Convert the Model to TensorRT Format
+### Step 2: Start the Development System
 
 ```bash
+docker-compose up --build
+```
+
+This starts:
+- Frontend on http://localhost:3000
+- Backend on http://localhost:8000 (using mock model)
+- Redis for caching
+
+### Step 3: Test the Application
+
+1. Open the web application at http://localhost:3000
+2. Upload an image with rain streaks
+3. Click "Process Image" to see a simulated de-raining effect
+4. View and download the processed image
+
+## Production Deployment with Real Model
+
+For production with the actual model and TensorRT acceleration:
+
+### Prerequisites
+
+- Docker and Docker Compose
+- NVIDIA GPU with CUDA support
+- NVIDIA Container Toolkit installed
+
+### Step 1: Prepare the Model
+
+If you have the PyTorch model:
+
+```bash
+# Create model repository structure
 python scripts/convert_to_tensorrt.py \
   --model-path model-checkpoint/model_epoch600.pth \
   --output-dir model_repository \
@@ -45,83 +76,79 @@ python scripts/convert_to_tensorrt.py \
   --precision fp16
 ```
 
-### Step 3: Build and Start the System
+### Step 2: Edit docker-compose.yml
+
+1. Uncomment the Triton, Kafka, Zookeeper, and Worker services
+2. Set `USE_MOCK_MODEL=false` in the backend service
+
+### Step 3: Start the System
 
 ```bash
 docker-compose up --build -d
 ```
 
-### Step 4: Access the Application
+## API Documentation
 
-- **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **Backend API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+When the system is running, you can access the API documentation at:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-## Usage
+## Troubleshooting
 
-1. Open the web application at [http://localhost:3000](http://localhost:3000)
-2. Navigate to the "Try It" section
-3. Upload an image with rain streaks
-4. Click "Process Image" to remove the rain streaks
-5. View and download the processed image
+### Frontend Can't Connect to Backend
 
-## System Architecture
+Check CORS settings in the backend and make sure the URL is correct in the frontend JavaScript.
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│             │     │             │     │             │     │             │
-│  Frontend   │────▶│  Backend    │────▶│   Kafka     │────▶│   Worker    │
-│  (Nginx)    │     │  (FastAPI)  │     │             │     │             │
-│             │     │             │     │             │     │             │
-└─────────────┘     └──────┬──────┘     └─────────────┘     └──────┬──────┘
-                           │                                        │
-                           │                                        │
-                           ▼                                        ▼
-                    ┌─────────────┐                         ┌─────────────┐
-                    │             │                         │             │
-                    │    Redis    │                         │   Triton    │
-                    │  (Caching)  │                         │  Inference  │
-                    │             │                         │   Server    │
-                    └─────────────┘                         └─────────────┘
-```
+### Mock Model vs Real Model
 
-## Technologies Used
+- The system defaults to using a mock implementation that applies basic image processing
+- Set `USE_MOCK_MODEL=false` in docker-compose.yml to use the real neural network model
+- Mock results will have a "MOCK RESULT" watermark to clearly indicate they're not from the real model
 
-- **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Python, FastAPI
-- **Message Queue**: Kafka
-- **Caching**: Redis
-- **Inference**: NVIDIA Triton Inference Server, TensorRT
-- **Containerization**: Docker, Docker Compose
+### Model Loading Errors
+
+If you see model loading errors:
+
+1. Check that the model file exists in the expected location
+2. Verify the model format is compatible
+3. Make sure PyTorch and other dependencies are installed
+4. For GPU errors, verify CUDA is working properly
 
 ## Development
 
-### Running Individual Components
-
-Each component can be built and run separately for development:
-
-#### Backend
+### Running Backend Locally
 
 ```bash
 cd backend
 pip install -r requirements.txt
+export USE_MOCK_MODEL=true  # Use mock model for testing
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-#### Frontend
+### Running Frontend Locally
 
 ```bash
 cd frontend
-# Any static file server will work, for example:
+# Use any static file server, for example:
 python -m http.server 3000
 ```
 
-## Troubleshooting
+## Extending the System
 
-### Common Issues
+### Adding More ML Models
 
-1. **GPU Access Issues**: Make sure the NVIDIA Container Toolkit is properly installed and configured.
-2. **Model Conversion Errors**: Check that the model path is correct and the model format is supported.
-3. **Kafka Connection Errors**: Ensure Zookeeper is running before Kafka.
+1. Create new model wrapper classes similar to `RainRemovalModel`
+2. Add new endpoints in the FastAPI application
+3. Integrate with the frontend
+
+### Scaling with Kubernetes
+
+For production deployment at scale, consider:
+
+1. Converting the docker-compose.yml to Kubernetes manifests
+2. Setting up proper resource limits and requests
+3. Using Horizontal Pod Autoscaling
+4. Implementing proper monitoring and logging
 
 ## License
 

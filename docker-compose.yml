@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - raindrop-network
+
+  # Backend service
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - USE_MOCK_MODEL=true
+      - MODEL_PATH=/app/model-checkpoint/model_epoch600.pth
+    volumes:
+      #- ./model-checkpoint:/app/model-checkpoint
+      - ./Raindrop-Removal:/app/Raindrop-Removal
+    networks:
+      - raindrop-network
+
+  # Redis for caching
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - raindrop-network
+    volumes:
+      - redis-data:/data
+
+  # For full deployment with Kafka and Triton, uncomment these services:
+  
+  # # Triton Inference Server
+  # triton:
+  #   image: nvcr.io/nvidia/tritonserver:21.10-py3
+  #   command: tritonserver --model-repository=/models
+  #   ports:
+  #     - "8001:8000"
+  #     - "8002:8001"
+  #     - "8003:8002"
+  #   volumes:
+  #     - ./model_repository:/models
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   networks:
+  #     - raindrop-network
+
+  # # Kafka for message queue
+  # kafka:
+  #   image: bitnami/kafka:latest
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+  #     - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+  #     - ALLOW_PLAINTEXT_LISTENER=yes
+  #   depends_on:
+  #     - zookeeper
+  #   networks:
+  #     - raindrop-network
+
+  # # Zookeeper for Kafka
+  # zookeeper:
+  #   image: bitnami/zookeeper:latest
+  #   ports:
+  #     - "2181:2181"
+  #   environment:
+  #     - ALLOW_ANONYMOUS_LOGIN=yes
+  #   networks:
+  #     - raindrop-network
+  #   volumes:
+  #     - zookeeper-data:/bitnami
+
+  # # Worker service for processing images
+  # worker:
+  #   build: ./inference_worker
+  #   depends_on:
+  #     - kafka
+  #     - triton
+  #   environment:
+  #     - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+  #     - TRITON_URL=triton:8000
+  #   networks:
+  #     - raindrop-network
+
+networks:
+  raindrop-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  zookeeper-data: 
