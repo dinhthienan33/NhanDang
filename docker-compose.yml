@@ -21,11 +21,10 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - USE_MOCK_MODEL=true
+      - USE_MOCK_MODEL=false
       - MODEL_PATH=/app/model-checkpoint/model_epoch600.pth
     volumes:
-      #- ./model-checkpoint:/app/model-checkpoint
-      - ./Raindrop-Removal:/app/Raindrop-Removal
+      - ./backend/Raindrop-Removal:/app/Raindrop-Removal
     networks:
       - raindrop-network
 
