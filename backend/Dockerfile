@@ -12,20 +12,19 @@ RUN apt-get update && apt-get install -y \
 # Set the working directory in the container
 WORKDIR /app
 
+# Create required directories
+RUN mkdir -p /app/checkpoint
+RUN mkdir -p /app/temp_images
+RUN mkdir -p /app/results
+
 # Copy the requirements file into the container
 COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the Raindrop-Removal source code
-#COPY Raindrop-Removal/model ./model
-#COPY Raindrop-Removal/layers.py .
-#COPY Raindrop-Removal/networks.py .
-#COPY Raindrop-Removal/utils.py .
-
-# Copy the model checkpoint
-COPY /model-checkpoint/model_epoch600.pth ./model-checkpoint/
+# Create placeholder file for model
+RUN touch /app/checkpoint/model_epoch600.pth
 
 # Copy the backend code
 COPY . .
@@ -34,4 +33,4 @@ COPY . .
 EXPOSE 8000
 
 # Run the FastAPI application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"] 
