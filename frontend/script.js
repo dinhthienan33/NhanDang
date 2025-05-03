@@ -100,50 +100,129 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Helper function to retry fetch
+    async function fetchWithRetry(url, options, maxRetries = 2) {
+        let retries = 0;
+        while (retries <= maxRetries) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                }
+                return response;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw error; // Don't retry timeouts
+                }
+                
+                retries++;
+                console.log(`Retry attempt ${retries}/${maxRetries}`);
+                
+                if (retries > maxRetries) {
+                    throw error;
+                }
+                
+                // Wait before retrying (exponential backoff)
+                await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+            }
+        }
+    }
+
     // Process image when process button is clicked
-    processBtn.addEventListener('click', () => {
+    processBtn.addEventListener('click', async () => {
         if (!uploadedFile) return;
         
-        // Show loading state
-        processedPreview.innerHTML = '<p>Processing...</p>';
+        // Show loading spinner
+        processedPreview.innerHTML = `
+            <div class="processing-container">
+                <div class="loading-spinner"></div>
+                <p class="processing-text">Processing your image...</p>
+                <p class="processing-subtext">This may take up to 30 seconds</p>
+            </div>
+        `;
         processBtn.disabled = true;
         
         // Create form data for the API request
         const formData = new FormData();
         formData.append('file', uploadedFile);
+
+        // Create a controller to handle timeouts
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
         
-        // Send request to backend API
-        fetch('http://localhost:8000/process', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.blob();
-        })
-        .then(imageBlob => {
-            // Display processed image
-            const imageUrl = URL.createObjectURL(imageBlob);
-            processedPreview.innerHTML = '';
+        try {
+            // Send request to backend API with timeout controller and retry
+            const response = await fetchWithRetry('http://localhost:8000/process', {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            });
             
-            const img = document.createElement('img');
+            clearTimeout(timeoutId);
+            const imageBlob = await response.blob();
+            
+            console.log('Received image blob:', imageBlob.size, 'bytes');
+            
+            // Create a new image object to ensure it's fully loaded
+            const img = new Image();
+            const imageUrl = URL.createObjectURL(imageBlob);
+            
+            // Show a loading message while the image loads
+            processedPreview.innerHTML = `
+                <div class="processing-container">
+                    <div class="loading-spinner"></div>
+                    <p class="processing-text">Loading processed image...</p>
+                </div>
+            `;
+            
+            // Set up promise for image loading
+            const imageLoaded = new Promise((resolve, reject) => {
+                img.onload = function() {
+                    console.log('Image loaded successfully');
+                    resolve();
+                };
+                
+                img.onerror = function(err) {
+                    console.error('Error loading image:', err);
+                    reject(new Error('Failed to load the processed image'));
+                };
+            });
+            
+            // Set the source to trigger loading
             img.src = imageUrl;
+            
+            // Wait for image to load
+            await imageLoaded;
+            
+            // Clear loading spinner and display processed image
+            processedPreview.innerHTML = '';
             processedPreview.appendChild(img);
             
             // Enable download button
             downloadBtn.href = imageUrl;
             downloadBtn.style.display = 'inline-block';
             
-            // Re-enable process button
-            processBtn.disabled = false;
-        })
-        .catch(error => {
+        } catch (error) {
+            clearTimeout(timeoutId);
             console.error('Error processing image:', error);
-            processedPreview.innerHTML = '<p>Error processing image. Please try again.</p>';
+            
+            // Show a more detailed error message
+            let errorMessage = error.message;
+            if (error.name === 'AbortError') {
+                errorMessage = 'The request took too long to complete. Please try again or use a smaller image.';
+            }
+            
+            processedPreview.innerHTML = `
+                <div class="processing-container" style="color: #e74c3c;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>Error processing image. Please try again.</p>
+                    <p style="font-size: 0.8rem; color: #666;">${errorMessage}</p>
+                </div>
+            `;
+        } finally {
+            // Always re-enable the process button
             processBtn.disabled = false;
-        });
+        }
     });
 
     // Function to handle files (validation and preview)
@@ -154,8 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file.type.match('image.*')) {
             fileInfo.style.display = 'block';
             fileInfo.textContent = 'Please select an image file (PNG, JPG, JPEG, etc.)';
+            processBtn.disabled = true;
             return;
         }
+        
+        // Disable the process button until preview is loaded
+        processBtn.disabled = true;
         
         // Save the file for later use
         uploadedFile = file;
@@ -164,24 +247,52 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInfo.style.display = 'block';
         fileInfo.textContent = `File: ${file.name} (${formatFileSize(file.size)})`;
         
-        // Create preview
+        // Show loading indicator in the original preview
+        originalPreview.innerHTML = `
+            <div class="processing-container">
+                <div class="loading-spinner"></div>
+                <p class="processing-text">Loading preview...</p>
+            </div>
+        `;
+        
+        // Reset processed image preview
+        processedPreview.innerHTML = '<p>Waiting for processing</p>';
+        downloadBtn.style.display = 'none';
+        
+        // Create preview using FileReader
         const reader = new FileReader();
         
         reader.onload = (e) => {
-            originalPreview.innerHTML = '';
+            // Pre-load the image to get dimensions and ensure it's valid
+            const img = new Image();
             
-            const img = document.createElement('img');
+            img.onload = function() {
+                // Update UI with loaded preview
+                originalPreview.innerHTML = '';
+                originalPreview.appendChild(img);
+                
+                // Enable process button only after preview is successfully loaded
+                processBtn.disabled = false;
+                
+                // Optional: Auto-click the process button if needed
+                // processBtn.click();
+            };
+            
+            img.onerror = function() {
+                originalPreview.innerHTML = '<p>Failed to load image preview</p>';
+                processBtn.disabled = true;
+            };
+            
+            // Begin loading the image
             img.src = e.target.result;
-            originalPreview.appendChild(img);
-            
-            // Reset processed image preview
-            processedPreview.innerHTML = '<p>Waiting for processing</p>';
-            downloadBtn.style.display = 'none';
-            
-            // Enable process button
-            processBtn.disabled = false;
         };
         
+        reader.onerror = () => {
+            originalPreview.innerHTML = '<p>Error loading image</p>';
+            processBtn.disabled = true;
+        };
+        
+        // Start reading the file as a data URL
         reader.readAsDataURL(file);
     }
 
