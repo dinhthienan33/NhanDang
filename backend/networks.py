@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn 
-import torchsummary
+# import torchsummary
 import layers 
 import numpy as np 
 import torch.nn.functional as F 
@@ -154,8 +154,8 @@ def init_weights(net, init_type='normal', init_gain=0.02):
     
     
 
-if __name__=='__main__':
-    model = Pix2PixDiscriminator(3, 256, 256, attention_mode='RCBAM').to('cuda')
-    print(model)
-    model(torch.randn(1,3,256,256).to('cuda'))
-    torchsummary.summary(model=model, input_size=(3, 256,256))
+# if __name__=='__main__':
+#     model = Pix2PixDiscriminator(3, 256, 256, attention_mode='RCBAM').to('cuda')
+#     print(model)
+#     model(torch.randn(1,3,256,256).to('cuda'))
+#     torchsummary.summary(model=model, input_size=(3, 256,256))

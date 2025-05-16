@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,7 +8,7 @@ import numpy as np
 from torchvision.transforms import Resize
 from model.base_model import BaseModel
 
-DEVICE = 'cpu' #'cuda' if torch.cuda.is_available() else 'cpu'
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class Model(BaseModel):
     def __init__(self, phase, in_channels=3, out_channels=3, nker=64, lr=0.0002) -> None:
@@ -157,13 +156,16 @@ class Model(BaseModel):
         self.generator.eval()
         self.generator_mask.eval()
         with torch.no_grad():
-            mask  = self.generator_mask(input.to(DEVICE))
-            output, _, _ = self.generator(torch.cat((input.to(DEVICE), mask), dim=1))
+            # Move inputs to the right device
+            input_device = input.to(DEVICE)
+            # Run inference
+            mask = self.generator_mask(input_device)
+            output, _, _ = self.generator(torch.cat((input_device, mask), dim=1))
 
         return {
-            'input':utils.tensor2numpy(input),
-            'output':utils.tensor2numpy(output),
-            'mask':utils.tensor2numpy(mask),
+            'input': utils.tensor2numpy(input),
+            'output': utils.tensor2numpy(output),
+            'mask': utils.tensor2numpy(mask),
         }
 
     '''
