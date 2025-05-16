@@ -11,6 +11,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="logo">
+            <img src="../assets/uit_icon.jpg" alt="UIT Logo">
             <h1>RainDrop</h1>
         </div>
         <ul class="nav-links">
@@ -56,9 +57,14 @@
                         <p>Preserves image details while removing rain artifacts.</p>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-cloud-upload-alt"></i>
+                        <i class="fas fa-cloud-rain"></i>
                         <h3>Easy to Use</h3>
                         <p>Simple upload and automatic processing of your images.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-user-friends"></i>
+                        <h3>Friendly Interface</h3>
+                        <p>User-friendly interface for easy image processing.</p>
                     </div>
                 </div>
             </div>
@@ -78,7 +84,9 @@
                         <input type="file" id="imageUpload" accept="image/*" hidden>
                     </div>
                     <div class="file-info" id="fileInfo"></div>
-                    <button id="processBtn" class="process-btn" disabled>Process Image</button>
+                    <div class="demo-controls">
+                        <button id="processBtn" class="process-btn" disabled>Process Image</button>
+                    </div>
                 </div>
                 <div class="results-container">
                     <div class="image-container">
