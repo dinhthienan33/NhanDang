@@ -1,13 +1,15 @@
-## inference_worker
-confluent-kafka
-requests
-numpy
-opencv-python-headless 
-## backend
-fastapi
-uvicorn[standard]
-torch
-opencv-python-headless
-numpy
-python-multipart
-pillow 
+# inference_worker
+#confluent-kafka==2.3.0         # Latest compatible version
+requests==2.31.0               # Stable and compatible
+numpy==1.26.4                  # numpy 2.x is not available; 1.26.4 is latest and compatible
+opencv-python-headless==4.9.0.80  # Latest compatible with Python 3.12
+# backend
+fastapi==0.111.0               # Latest version
+uvicorn[standard]==0.29.0      # Latest version with all dependencies
+torch==2.3.0                   # Latest stable PyTorch (Python 3.12 supported)
+torchvision==0.18.0            # Compatible with torch 2.3.0
+opencv-python-headless==4.9.0.80
+numpy==1.26.4
+python-multipart==0.0.9
+pillow==10.3.0
+tqdm==4.66.4
