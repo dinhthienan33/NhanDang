@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-torch
-opencv-python-headless
-numpy
-python-multipart
-pillow 

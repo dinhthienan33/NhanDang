@@ -4,3 +4,6 @@ backend/results
 backend/result
 result
 temp_images/
+.venv
+__pycache__/
+
