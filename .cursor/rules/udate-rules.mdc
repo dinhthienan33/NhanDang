@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Convert to uv pip install 
+- Convert to ViteJs for frontend @frontend
+- Update your change in [memory.md](mdc:memory.md) after all your changes

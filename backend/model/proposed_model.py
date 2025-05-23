@@ -14,7 +14,7 @@ class Model(BaseModel):
     def __init__(self, phase, in_channels=3, out_channels=3, nker=64, lr=0.0002) -> None:
         assert phase in ['train', 'test']
 
-        self.use_resize = False if phase=='trian' else True
+        self.use_resize = False if phase=='train' else True
         self.generator_mask = networks.Unet3(3, 1, nker, use_resize=self.use_resize).to(DEVICE)
         self.generator = networks.UnetWithAttentionMultiOut(in_channels + 1, out_channels, nker, attention_mode='RCBAM', relu=0.2, use_resize=self.use_resize).to(DEVICE)
         self.discriminator = networks.Pix2PixDiscriminator().to(DEVICE)

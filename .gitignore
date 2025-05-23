@@ -6,4 +6,5 @@ result
 temp_images/
 .venv
 __pycache__/
-
+*.pth
+*.onnx

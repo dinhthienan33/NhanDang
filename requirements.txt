@@ -3,6 +3,7 @@
 requests==2.31.0               # Stable and compatible
 numpy==1.26.4                  # numpy 2.x is not available; 1.26.4 is latest and compatible
 opencv-python-headless==4.9.0.80  # Latest compatible with Python 3.12
+
 # backend
 fastapi==0.111.0               # Latest version
 uvicorn[standard]==0.29.0      # Latest version with all dependencies
@@ -13,3 +14,8 @@ numpy==1.26.4
 python-multipart==0.0.9
 pillow==10.3.0
 tqdm==4.66.4
+
+#onnx
+onnx>=1.10.0
+onnxruntime>=1.8.0
+matplotlib>=3.5.0

@@ -24,7 +24,7 @@ class RainRemovalInference:
     def _load_model(self):
         model, _ = find_model(self.model_name, 'test')
         self.epoch = model.load(self.ckpt_dir, epoch=self.ckpt_epoch)
-        print(f'Loaded {self.model_name} at EPOCH {self.epoch} on {self.device}!!')
+        print(f'Loaded {self.model_name} at EPOCH {self.ckpt_epoch} on {self.device}!!')
         model.generator.eval()
         model.generator_mask.eval()
         if self.device == 'cuda':

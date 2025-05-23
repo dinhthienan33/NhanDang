@@ -3,13 +3,6 @@ description:
 globs: 
 alwaysApply: true
 ---
-**Translating and formatting request**
-
-The user asks me to translate the Vietnamese text into English and convert it to markdown, ensuring each item is organized into complete thoughts. I'll ensure everything flows clearly in full sentences, with all ideas properly conveyed. Then, I'll format it into markdown following the user's request, organizing the content in a way that's easy to read and structurally sound. My goal is to stay true to the meaning, translating accurately, and making it visually clear using markdown.
-
-**Translating and converting to markdown**
-
-The user wants me to translate and convert the paragraph into English with full clarity. Here's how I'll approach it:
 
 1. I want to develop an automatic rain streak removal system.
 2. I already have a Jupyter Notebook (.ipynb) for both training and inference.
